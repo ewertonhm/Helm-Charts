@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }} 
+  labels:
+    app: {{ .Values.appName }} 
+    deploymentconfig: {{ .Values.appName }} 
+    kube_app: {{ .Values.appName }} 
+    kube_deployment: {{ .Values.appName }} 
+    kube_namespace: {{ .Values.namespace }}
+    tags.datadoghq.com/env: {{ .Values.environment }}
+    tags.datadoghq.com/service: {{ .Values.appName }}
+    tags.datadoghq.com/version: {{ .Values.image.tag }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }} 
+      deploymentconfig: {{ .Values.appName }} 
+      kube_app: {{ .Values.appName }} 
+      kube_deployment: {{ .Values.appName }} 
+      kube_namespace: {{ .Values.namespace }}
+  template:
+    metadata:
+      annotations:        
+        "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp", "service":"{{ .Values.appName }}"}]'
+        "com.datadoghq.ad.logs" : '[{"service": "{{ .Values.appName }}"}]'
+      labels:
+        app: {{ .Values.appName }} 
+        deploymentconfig: {{ .Values.appName }} 
+        kube_app: {{ .Values.appName }} 
+        kube_deployment: {{ .Values.appName }} 
+        kube_namespace: {{ .Values.namespace }}
+        tags.datadoghq.com/env: {{ .Values.environment }}
+        tags.datadoghq.com/service: {{ .Values.appName }}
+        tags.datadoghq.com/version: {{ .Values.image.tag }}
+    spec:    
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecret }}
+      volumes:
+      - name: {{ .Values.Mount.sistemasHavan.MountName }}
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.Mount.sistemasHavan.SecretName }}
+      - name: {{ .Values.Mount.clienteLib.MountName }}
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.Mount.superapp.SecretName }}
+          - secret:
+              name: {{ .Values.Mount.clienteLib.SecretName }}              
+          {{- if (eq .Values.appName "app-havan-identity-server") }} 
+          - secret:
+              name: {{ .Values.Mount.authenticationIdentityServer.SecretName }}  
+          {{- end }}
+      {{- if (eq .Values.appName "app-havan-identity-server") }}
+      - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.Mount.pfxAppHavanIdentityServer.SecretName }}
+      - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.Mount.pemAppHavanIdentityServer.SecretName }}
+      {{- end }}
+             
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}         
+          {{- with .Values.image.ports }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }} 
+          envFrom:
+          - configMapRef:
+              name: namespace-global-envs   
+          env:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: DD_LOGS_INJECTION
+            value: 'true'         
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: 'true'
+          - name: DD_ENTITY_ID
+            valueFrom:
+                fieldRef:
+                    fieldPath: metadata.uid      
+          - name: DD_ENV
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['tags.datadoghq.com/env']
+          - name: DD_SERVICE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['tags.datadoghq.com/service']
+          - name: DD_TRACE_HEADER_TAGS
+            value: "CASE-insensitive-Header:Origem,Chamada,Authorization" 
+          - name: DD_VERSION
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['tags.datadoghq.com/version']
+          {{- if (eq .Values.appName "app-havan-identity-server") }}
+          - name: ASPNETCORE_URLS
+            value: https://*:5001;http://*:5000
+          - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+            value: /app/certs/app-havan-identity-server.pfx
+          - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+            value: "123456"
+          {{- end }}
+          - name: APP_NAME
+            value: {{ .Values.appName }}  
+          volumeMounts:
+          - name: {{ .Values.Mount.sistemasHavan.MountName }}
+            mountPath: {{ .Values.Mount.sistemasHavan.MountPath }}
+          - name: {{ .Values.Mount.clienteLib.MountName }}
+            mountPath: {{ .Values.Mount.clienteLib.MountPath }}
+          {{- if (eq .Values.appName "app-havan-identity-server") }}  
+          - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pfxAppHavanIdentityServer.MountPath }}
+          - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pemAppHavanIdentityServer.MountPath }}
+            subPath: {{ .Values.Mount.pemAppHavanIdentityServer.SubPath }} 
+          {{- end }}
+
+

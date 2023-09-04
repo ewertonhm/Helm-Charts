@@ -1,0 +1,106 @@
+replicaCount: 1
+appName: 'appname'
+namespace: 'namespace'
+environment: 'environment'
+areaFoco: "Cliente"
+deployment_strategy: 'deployment strategy'
+
+useEnvKeyVaulName: "userEnvKeyVaulName"
+keyVaulName: "keyVaultName"
+
+hpa:
+  status: "status"
+  replicaCount:
+    min: 1
+    max: 10
+  metric:
+    targetAverageValue: 1.2
+    metricName: "trace.aspnet_core.request.hits"
+    
+Mount:  
+  sistemasHavan:
+    MountName: "sistemas-havan"
+    SecretName: "sistemas-havan"
+    MountPath: "/app/secrets/sistemas-havan"
+  clienteLib:
+    MountName: "client-lib"
+    SecretName: "client-lib"
+    MountPath: "/app/secrets"
+  superapp:
+    MountName: "superapp"
+    SecretName: "superapp"
+    MountPath: "/app/secrets"
+  crm:
+    MountName: "crm"
+    SecretName: "crm"
+    MountPath: "/app/secrets" 
+  allinone:
+    MountName: "all-in-one"
+    SecretName: "all-in-one"
+    MountPath: "/app/secrets"  
+  authenticationIdentityServer:
+    MountName: "authentication-identity-server"
+    SecretName: "authentication-identity-server"
+    MountPath: "/app/secrets/"
+  pfxAppHavanIdentityServer:
+    MountName: "pfx-app-havan-identity-server"
+    SecretName: "pfx-app-havan-identity-server"
+    MountPath: "/app/certs"
+  pemAppHavanIdentityServer:
+    MountName: "pem-app-havan-identity-server"
+    SecretName: "pem-app-havan-identity-server"
+    MountPath: "/etc/ssl/certs/app-havan-identity-server.pem"
+    SubPath: "app-havan-identity-server.pem"
+
+    
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 5000
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 6
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 5000
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 2
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 10m
+    memory: 8Mi
+    
+image:
+  repository: registry.tools.havan.com.br/<+stage.variables.FOCUS_AREA>/<+stage.variables.NAME_PROJECT>
+  tag: <+stage.variables.BRANCH_PIPELINE>-<+stage.variables.SEQUENCE_PIPELINE>
+  pullPolicy: IfNotPresent
+  imagePullSecret: "proget"
+  ports:
+    - name: http
+      containerPort: 5000
+      protocol: TCP
+    - name: https
+      containerPort: 5001
+      protocol: TCP
+      
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: http
+  portName: http
+  protocol: TCP
+
+ingress:
+  enabled: "true"
+  host: <+pipeline.stages.Deploy.spec.infrastructure.infrastructureDefinition.provisioner.steps.SetClusterDynamic.output.outputVariables.urlIngress>
