@@ -38,10 +38,10 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}
       volumes:
-      - name: {{ .Values.Mount.sistemasHavan.MountName }}
+      - name: {{ .Values.Mount.sistemaslocal.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.sistemasHavan.SecretName }}
+          secretName: {{ .Values.Mount.sistemaslocal.SecretName }}
       - name: {{ .Values.Mount.clienteLib.MountName }}
         projected:
           sources:
@@ -49,19 +49,19 @@ spec:
               name: {{ .Values.Mount.superapp.SecretName }}
           - secret:
               name: {{ .Values.Mount.clienteLib.SecretName }}              
-          {{- if (eq .Values.appName "app-havan-identity-server") }} 
+          {{- if (eq .Values.appName "app-local-identity-server") }} 
           - secret:
               name: {{ .Values.Mount.authenticationIdentityServer.SecretName }}  
           {{- end }}
-      {{- if (eq .Values.appName "app-havan-identity-server") }}
-      - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
+      {{- if (eq .Values.appName "app-local-identity-server") }}
+      - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.pfxAppHavanIdentityServer.SecretName }}
-      - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
+          secretName: {{ .Values.Mount.pfxApplocalIdentityServer.SecretName }}
+      - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.pemAppHavanIdentityServer.SecretName }}
+          secretName: {{ .Values.Mount.pemApplocalIdentityServer.SecretName }}
       {{- end }}
              
       containers:
@@ -108,27 +108,27 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.labels['tags.datadoghq.com/version']
-          {{- if (eq .Values.appName "app-havan-identity-server") }}
+          {{- if (eq .Values.appName "app-local-identity-server") }}
           - name: ASPNETCORE_URLS
             value: https://*:5001;http://*:5000
           - name: ASPNETCORE_Kestrel__Certificates__Default__Path
-            value: /app/certs/app-havan-identity-server.pfx
+            value: /app/certs/app-local-identity-server.pfx
           - name: ASPNETCORE_Kestrel__Certificates__Default__Password
             value: "123456"
           {{- end }}
           - name: APP_NAME
             value: {{ .Values.appName }}  
           volumeMounts:
-          - name: {{ .Values.Mount.sistemasHavan.MountName }}
-            mountPath: {{ .Values.Mount.sistemasHavan.MountPath }}
+          - name: {{ .Values.Mount.sistemaslocal.MountName }}
+            mountPath: {{ .Values.Mount.sistemaslocal.MountPath }}
           - name: {{ .Values.Mount.clienteLib.MountName }}
             mountPath: {{ .Values.Mount.clienteLib.MountPath }}
-          {{- if (eq .Values.appName "app-havan-identity-server") }}  
-          - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pfxAppHavanIdentityServer.MountPath }}
-          - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pemAppHavanIdentityServer.MountPath }}
-            subPath: {{ .Values.Mount.pemAppHavanIdentityServer.SubPath }} 
+          {{- if (eq .Values.appName "app-local-identity-server") }}  
+          - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pfxApplocalIdentityServer.MountPath }}
+          - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pemApplocalIdentityServer.MountPath }}
+            subPath: {{ .Values.Mount.pemApplocalIdentityServer.SubPath }} 
           {{- end }}
 
 

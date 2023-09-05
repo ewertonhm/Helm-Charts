@@ -41,11 +41,11 @@ spec:
       - hostPath:
           path: /var/run/datadog/
         name: apmsocketpath
-      - name: {{ .Values.Mount.sistemasHavan.MountName }}
+      - name: {{ .Values.Mount.sistemaslocal.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.sistemasHavan.SecretName }}
-      {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-havan") }}
+          secretName: {{ .Values.Mount.sistemaslocal.SecretName }}
+      {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-local") }}
       - name: {{ .Values.Mount.clienteLib.MountName }}
         projected:
           sources:
@@ -58,17 +58,17 @@ spec:
           - secret:
               name: {{ .Values.Mount.crm.SecretName }}
       {{- end }}
-      {{- if (eq .Values.appName "app-havan-identity-server") }} 
+      {{- if (eq .Values.appName "app-local-identity-server") }} 
           - secret:
               name: {{ .Values.Mount.authenticationIdentityServer.SecretName }}
-      - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
+      - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.pfxAppHavanIdentityServer.SecretName }}
-      - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
+          secretName: {{ .Values.Mount.pfxApplocalIdentityServer.SecretName }}
+      - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.Mount.pemAppHavanIdentityServer.SecretName }}
+          secretName: {{ .Values.Mount.pemApplocalIdentityServer.SecretName }}
       {{- end }}
       
       containers:
@@ -115,13 +115,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.labels['tags.datadoghq.com/version']
-          {{- if (eq .Values.appName "app-havan-identity-server") }}
+          {{- if (eq .Values.appName "app-local-identity-server") }}
           - name: ASPNETCORE_URLS
             value: https://*:5001;http://*:5000
           - name: ASPNETCORE_Kestrel__Certificates__Default__Path
-            value: /app/certs/app-havan-identity-server.pfx
+            value: /app/certs/app-local-identity-server.pfx
           - name: ASPNETCORE_Kestrel__Certificates__Default__Password
-            value: Havan@2022
+            value: local@2022
           {{- end }}
           - name: APP_NAME
             value: {{ .Values.appName }}  
@@ -130,19 +130,19 @@ spec:
             value: {{ .Values.keyVaulName }}  
           {{- end }}
           volumeMounts:
-          - name: {{ .Values.Mount.sistemasHavan.MountName }}
-            mountPath: {{ .Values.Mount.sistemasHavan.MountPath }}
+          - name: {{ .Values.Mount.sistemaslocal.MountName }}
+            mountPath: {{ .Values.Mount.sistemaslocal.MountPath }}
           - name: apmsocketpath
             mountPath: /var/run/datadog
-          {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-havan")}}
+          {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-local")}}
           - name: {{ .Values.Mount.clienteLib.MountName }}
             mountPath: {{ .Values.Mount.clienteLib.MountPath }}
           {{- end }}        
-          {{- if (eq .Values.appName "app-havan-identity-server") }}  
-          - name: {{ .Values.Mount.pfxAppHavanIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pfxAppHavanIdentityServer.MountPath }}
-          - name: {{ .Values.Mount.pemAppHavanIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pemAppHavanIdentityServer.MountPath }}
-            subPath: {{ .Values.Mount.pemAppHavanIdentityServer.SubPath }} 
+          {{- if (eq .Values.appName "app-local-identity-server") }}  
+          - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pfxApplocalIdentityServer.MountPath }}
+          - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
+            mountPath: {{ .Values.Mount.pemApplocalIdentityServer.MountPath }}
+            subPath: {{ .Values.Mount.pemApplocalIdentityServer.SubPath }} 
           {{- end }}
 

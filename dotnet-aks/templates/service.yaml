@@ -11,7 +11,7 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: {{ .Values.service.protocol }}
       name: {{ .Values.service.portName }}
-    {{- if (eq .Values.appName "app-havan-identity-server") }}   
+    {{- if (eq .Values.appName "app-local-identity-server") }}   
     - port: 5001
       targetPort: https
       protocol: TCP

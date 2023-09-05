@@ -31,6 +31,6 @@ spec:
   tls:
   - hosts:
     - {{ .Values.ingress.host }}
-    secretName: havan-default-tls
+    secretName: local-default-tls
   {{ end }}
 {{ end }}

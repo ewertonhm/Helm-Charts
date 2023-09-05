@@ -18,10 +18,10 @@ hpa:
     metricName: "trace.aspnet_core.request.hits"
     
 Mount:  
-  sistemasHavan:
-    MountName: "sistemas-havan"
-    SecretName: "sistemas-havan"
-    MountPath: "/app/secrets/sistemas-havan"
+  sistemaslocal:
+    MountName: "sistemas-local"
+    SecretName: "sistemas-local"
+    MountPath: "/app/secrets/sistemas-local"
   clienteLib:
     MountName: "client-lib"
     SecretName: "client-lib"
@@ -42,15 +42,15 @@ Mount:
     MountName: "authentication-identity-server"
     SecretName: "authentication-identity-server"
     MountPath: "/app/secrets/"
-  pfxAppHavanIdentityServer:
-    MountName: "pfx-app-havan-identity-server"
-    SecretName: "pfx-app-havan-identity-server"
+  pfxApplocalIdentityServer:
+    MountName: "pfx-app-local-identity-server"
+    SecretName: "pfx-app-local-identity-server"
     MountPath: "/app/certs"
-  pemAppHavanIdentityServer:
-    MountName: "pem-app-havan-identity-server"
-    SecretName: "pem-app-havan-identity-server"
-    MountPath: "/etc/ssl/certs/app-havan-identity-server.pem"
-    SubPath: "app-havan-identity-server.pem"
+  pemApplocalIdentityServer:
+    MountName: "pem-app-local-identity-server"
+    SecretName: "pem-app-local-identity-server"
+    MountPath: "/etc/ssl/certs/app-local-identity-server.pem"
+    SubPath: "app-local-identity-server.pem"
 
     
 readinessProbe:
@@ -82,7 +82,7 @@ resources:
     memory: 8Mi
     
 image:
-  repository: registry.tools.havan.com.br/<+stage.variables.FOCUS_AREA>/<+stage.variables.NAME_PROJECT>
+  repository: registry.tools.local.com.br/<+stage.variables.FOCUS_AREA>/<+stage.variables.NAME_PROJECT>
   tag: <+stage.variables.BRANCH_PIPELINE>-<+stage.variables.SEQUENCE_PIPELINE>
   pullPolicy: IfNotPresent
   imagePullSecret: "proget"
