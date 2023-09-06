@@ -1,4 +1,3 @@
-{{- if and (eq .Values.ingress.enabled true) (eq .Values.containerPlataform "rancher") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -53,4 +52,3 @@ spec:
             value: "true"
           - name: DD_RUNTIME_METRICS_ENABLED
             value: "true"
-{{- end }}
