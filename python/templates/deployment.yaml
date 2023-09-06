@@ -24,7 +24,7 @@ spec:
   template:
     metadata:
       annotations:
-        admission.datadoghq.com/dotnet-lib.version: v2.35.0
+        admission.datadoghq.com/python-lib.version: v1.17.3
       labels:
         app: {{ .Values.appName }} 
         deploymentconfig: {{ .Values.appName }} 
@@ -45,12 +45,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}     
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
+          - name: DD_PROFILING_ENABLED
+            value: "true"
           - name: DD_LOGS_INJECTION
-            value: "true"
-          - name: DD_APPSEC_ENABLED
-            value: "true"
-          - name: DD_RUNTIME_METRICS_ENABLED
-            value: "true"
+            value: "true" 
 {{- end }}
