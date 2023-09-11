@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }} 
+  labels:
+    app: {{ .Values.appName }} 
+    deploymentconfig: {{ .Values.appName }} 
+    kube_app: {{ .Values.appName }} 
+    kube_deployment: {{ .Values.appName }} 
+    kube_namespace: {{ .Values.namespace }}
+    tags.datadoghq.com/env: {{ .Values.environment }}
+    tags.datadoghq.com/service: {{ .Values.appName }}
+    tags.datadoghq.com/version: {{ .Values.image.tag }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }} 
+      deploymentconfig: {{ .Values.appName }} 
+      kube_app: {{ .Values.appName }} 
+      kube_deployment: {{ .Values.appName }} 
+      kube_namespace: {{ .Values.namespace }}
+  template:
+    metadata:
+      annotations:
+        admission.datadoghq.com/js-lib.version: latest
+      labels:
+        app: {{ .Values.appName }} 
+        deploymentconfig: {{ .Values.appName }} 
+        kube_app: {{ .Values.appName }} 
+        kube_deployment: {{ .Values.appName }} 
+        kube_namespace: {{ .Values.namespace }}
+        tags.datadoghq.com/env: {{ .Values.environment }}
+        tags.datadoghq.com/service: {{ .Values.appName }}
+        tags.datadoghq.com/version: {{ .Values.image.tag }}
+        admission.datadoghq.com/enabled: "true"
+    spec:    
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}         
+          {{- with .Values.image.ports }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          - name: DD_PROFILING_ENABLED
+            value: "true"
+          - name: DD_LOGS_INJECTION
+            value: "true" 

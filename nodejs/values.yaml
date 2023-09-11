@@ -1,0 +1,34 @@
+containerPlataform: rancher
+replicaCount: 2
+
+appName: "nodejs-web"
+namespace: "apps"
+environment: "asgard"
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 1m
+    memory: 64Mi
+
+image:
+  repository: "ewertonmarschalk/nodejs-hello-world"
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+  ports:
+    - name: http
+      containerPort: 8080
+      protocol: TCP
+      
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: http
+  portName: http
+  protocol: TCP
+
+ingress:
+  enabled: true
+  host: "nodejsweb.cluster.local"
