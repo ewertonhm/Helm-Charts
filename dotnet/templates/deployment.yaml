@@ -23,6 +23,7 @@ spec:
   template:
     metadata:
       annotations:
+        "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp", "service":"{{ .Values.appName }}"}]'
         admission.datadoghq.com/dotnet-lib.version: v2.35.0
       labels:
         app: {{ .Values.appName }} 

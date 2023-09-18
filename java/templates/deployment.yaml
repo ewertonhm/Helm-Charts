@@ -23,6 +23,7 @@ spec:
   template:
     metadata:
       annotations:
+        "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"java", "service":"{{ .Values.appName }}"}]'
         admission.datadoghq.com/java-lib.version: v1.19.0
       labels:
         app: {{ .Values.appName }} 
