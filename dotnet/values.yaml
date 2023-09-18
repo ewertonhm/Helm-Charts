@@ -33,3 +33,4 @@ service:
 ingress:
   enabled: true
   host: "dotnetapi.cluster.local"
+  cert: apps-cert-tls

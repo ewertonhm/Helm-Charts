@@ -8,6 +8,7 @@ spec:
   tls:
     - hosts:
       - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.cert }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:
@@ -18,4 +19,4 @@ spec:
             service:
               name: {{ .Values.appName }}
               port:
-                name: http
+                number: 80
