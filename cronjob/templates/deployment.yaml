@@ -1,4 +1,4 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ .Values.appName }}
@@ -9,7 +9,7 @@ metadata:
     kube_deployment: {{ .Values.appName }}
     kube_namespace: {{ .Values.namespace }}
 spec:
-  schedule: {{ .Values.schedule }}
+  schedule: '* * * * *'
   concurrencyPolicy: {{ .Values.concurrencyPolicy }}
   failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit }}
   startingDeadlineSeconds: {{ .Values.startingDeadlineSeconds }}
@@ -21,6 +21,7 @@ spec:
       template:
         metadata:
           annotations:
+            admission.datadoghq.com/dotnet-lib.version: v2.38.0
             "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp", "service":"{{ .Values.appName }}"}]'
           labels:
             app: {{ .Values.appName }}
@@ -31,46 +32,11 @@ spec:
             tags.datadoghq.com/env: {{ .Values.environment }}
             tags.datadoghq.com/service: {{ .Values.appName }}
             tags.datadoghq.com/version: {{ .Values.image.tag }}
-        spec:
-          imagePullSecrets:
-            - name: "proget"
-          volumes:
-          - hostPath:
-              path: /var/run/datadog/
-            name: apmsocketpath     
-          - name: {{ .Values.Mount.sistemasHavan.MountName }}
-            secret:
-              defaultMode: 420
-              secretName: {{ .Values.Mount.sistemasHavan.SecretName }}   
-          {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") }}
-          - name: {{ .Values.Mount.clienteLib.MountName }}
-            projected:
-              sources:
-              - secret:
-                  name: {{ .Values.Mount.superapp.SecretName }}
-              - secret:
-                  name: {{ .Values.Mount.clienteLib.SecretName }}
-          {{- end }}
-          {{- if (eq .Values.namespace "crm")}}
-              - secret:
-                  name: {{ .Values.Mount.crm.SecretName }}
-          {{- end }}     
+        spec:  
           restartPolicy: OnFailure
-          #nodeSelector:
-             #areafoco: {{ .Values.areaFoco }}
-          containers:
           - name: {{ .Values.appName }}
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
-            {{- with .Values.image.ports }}
-            ports:
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-            resources:
-              {{- toYaml .Values.resources | nindent 13 }}
-            envFrom:
-            - configMapRef:
-                name: namespace-global-envs
             env:
             - name: DD_AGENT_HOST
               valueFrom:
@@ -82,36 +48,6 @@ spec:
               value: Serilog  
             - name: DD_RUNTIME_METRICS_ENABLED
               value: 'true'
-            - name: DD_ENTITY_ID
-              valueFrom:
-                  fieldRef:
-                      fieldPath: metadata.uid      
-            - name: DD_ENV
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tags.datadoghq.com/env']
-            - name: DD_SERVICE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tags.datadoghq.com/service']
-            - name: DD_VERSION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tags.datadoghq.com/version']
-            - name: APP_NAME
-              value: {{ .Values.appName }} 
-            {{- if (eq .Values.useEnvKeyVaulName "true") }}
-            - name: KEY_VAULT_NAME
-              value: {{ .Values.keyVaulName }}  
-            {{- end }}
-            volumeMounts:
-            - name: {{ .Values.Mount.sistemasHavan.MountName }}
-              mountPath: {{ .Values.Mount.sistemasHavan.MountPath }}
-            - name: apmsocketpath
-              mountPath: /var/run/datadog 
-            {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") }}
-            - name: {{ .Values.Mount.clienteLib.MountName }}
-              mountPath: {{ .Values.Mount.clienteLib.MountPath }}
-            {{- end }}     
+
 
 

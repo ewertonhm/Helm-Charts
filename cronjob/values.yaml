@@ -1,36 +1,14 @@
 replicaCount: 1
-appName: <+stage.variables.NAME_PROJECT>
-namespace: <+stage.variables.FOCUS_AREA>
-environment: <+stage.variables.CLUSTER_ENV>
-areaFoco: "Cliente"
-
-useEnvKeyVaulName: "<+pipeline.stages.Deploy.spec.infrastructure.infrastructureDefinition.provisioner.steps.SetClusterDynamic.output.outputVariables.useEnvKeyVaultName>"
-keyVaulName: "<+pipeline.stages.Deploy.spec.infrastructure.infrastructureDefinition.provisioner.steps.SetClusterDynamic.output.outputVariables.keyVaultName>"
-
-Mount:  
-  sistemasHavan:
-    MountName: "sistemas-havan"
-    SecretName: "sistemas-havan"
-    MountPath: "/app/secrets/sistemas-havan"
-  clienteLib:
-    MountName: "client-lib"
-    SecretName: "client-lib"
-    MountPath: "/app/secrets"
-  superapp:
-    MountName: "superapp"
-    SecretName: "superapp"
-    MountPath: "/app/secrets"
-  crm:
-    MountName: "crm"
-    SecretName: "crm"
-    MountPath: "/app/secrets"  
+appName: dotnet-cronjob
+namespace: apps
+environment: teste-ewerton
 
 parallelism: 1
 productionParallelism: 10
 completions: 1
 productionCompletions: 10
 activeDeadlineSeconds: 36000
-schedule: "<+stage.variables.SCHEDULING_CRONJOB>"
+schedule: '* * * * *'
 concurrencyPolicy: Allow
 failedJobsHistoryLimit: 30
 successfulJobsHistoryLimit: 30
@@ -45,9 +23,6 @@ resources:
     memory: 64Mi
 
 image:
-  repository: registry.tools.havan.com.br/<+stage.variables.FOCUS_AREA>/<+stage.variables.NAME_PROJECT>
-  tag: <+stage.variables.BRANCH_PIPELINE>-<+stage.variables.SEQUENCE_PIPELINE>
+  repository: ewertonmarschalk/dotnet-api
+  tag: 1.0.1
   pullPolicy: IfNotPresent
-
-imagePullSecrets:
-  - name: proget
