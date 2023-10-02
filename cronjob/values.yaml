@@ -1,0 +1,53 @@
+replicaCount: 1
+appName: <+stage.variables.NAME_PROJECT>
+namespace: <+stage.variables.FOCUS_AREA>
+environment: <+stage.variables.CLUSTER_ENV>
+areaFoco: "Cliente"
+
+useEnvKeyVaulName: "<+pipeline.stages.Deploy.spec.infrastructure.infrastructureDefinition.provisioner.steps.SetClusterDynamic.output.outputVariables.useEnvKeyVaultName>"
+keyVaulName: "<+pipeline.stages.Deploy.spec.infrastructure.infrastructureDefinition.provisioner.steps.SetClusterDynamic.output.outputVariables.keyVaultName>"
+
+Mount:  
+  sistemasHavan:
+    MountName: "sistemas-havan"
+    SecretName: "sistemas-havan"
+    MountPath: "/app/secrets/sistemas-havan"
+  clienteLib:
+    MountName: "client-lib"
+    SecretName: "client-lib"
+    MountPath: "/app/secrets"
+  superapp:
+    MountName: "superapp"
+    SecretName: "superapp"
+    MountPath: "/app/secrets"
+  crm:
+    MountName: "crm"
+    SecretName: "crm"
+    MountPath: "/app/secrets"  
+
+parallelism: 1
+productionParallelism: 10
+completions: 1
+productionCompletions: 10
+activeDeadlineSeconds: 36000
+schedule: "<+stage.variables.SCHEDULING_CRONJOB>"
+concurrencyPolicy: Allow
+failedJobsHistoryLimit: 30
+successfulJobsHistoryLimit: 30
+startingDeadlineSeconds: 200
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 384Mi
+  requests:
+    cpu: 24m
+    memory: 64Mi
+
+image:
+  repository: registry.tools.havan.com.br/<+stage.variables.FOCUS_AREA>/<+stage.variables.NAME_PROJECT>
+  tag: <+stage.variables.BRANCH_PIPELINE>-<+stage.variables.SEQUENCE_PIPELINE>
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: proget
