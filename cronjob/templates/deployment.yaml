@@ -21,8 +21,7 @@ spec:
       template:
         metadata:
           annotations:
-            admission.datadoghq.com/dotnet-lib.version: v2.38.0
-            "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp", "service":"{{ .Values.appName }}"}]'
+            "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp"}]'
           labels:
             app: {{ .Values.appName }}
             deploymentconfig: {{ .Values.appName }}
