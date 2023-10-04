@@ -2,56 +2,6 @@ replicaCount: 1
 appName: 'appname'
 namespace: 'namespace'
 environment: 'environment'
-areaFoco: "Cliente"
-deployment_strategy: 'deployment strategy'
-
-useEnvKeyVaulName: "userEnvKeyVaulName"
-keyVaulName: "keyVaultName"
-
-hpa:
-  status: "status"
-  replicaCount:
-    min: 1
-    max: 10
-  metric:
-    targetAverageValue: 1.2
-    metricName: "trace.aspnet_core.request.hits"
-    
-Mount:  
-  sistemaslocal:
-    MountName: "sistemas-local"
-    SecretName: "sistemas-local"
-    MountPath: "/app/secrets/sistemas-local"
-  clienteLib:
-    MountName: "client-lib"
-    SecretName: "client-lib"
-    MountPath: "/app/secrets"
-  superapp:
-    MountName: "superapp"
-    SecretName: "superapp"
-    MountPath: "/app/secrets"
-  crm:
-    MountName: "crm"
-    SecretName: "crm"
-    MountPath: "/app/secrets" 
-  allinone:
-    MountName: "all-in-one"
-    SecretName: "all-in-one"
-    MountPath: "/app/secrets"  
-  authenticationIdentityServer:
-    MountName: "authentication-identity-server"
-    SecretName: "authentication-identity-server"
-    MountPath: "/app/secrets/"
-  pfxApplocalIdentityServer:
-    MountName: "pfx-app-local-identity-server"
-    SecretName: "pfx-app-local-identity-server"
-    MountPath: "/app/certs"
-  pemApplocalIdentityServer:
-    MountName: "pem-app-local-identity-server"
-    SecretName: "pem-app-local-identity-server"
-    MountPath: "/etc/ssl/certs/app-local-identity-server.pem"
-    SubPath: "app-local-identity-server.pem"
-
     
 readinessProbe:
   httpGet:

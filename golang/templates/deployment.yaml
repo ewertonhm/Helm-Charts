@@ -23,8 +23,7 @@ spec:
   template:
     metadata:
       annotations:        
-        "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"golang", "service":"{{ .Values.appName }}"}]'
-        "com.datadoghq.ad.logs" : '[{"service": "{{ .Values.appName }}"}]'
+        "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"golang"}]'
       labels:
         app: {{ .Values.appName }} 
         deploymentconfig: {{ .Values.appName }} 
@@ -45,38 +44,6 @@ spec:
         secret:
           defaultMode: 420
           secretName: {{ .Values.Mount.sistemaslocal.SecretName }}
-      {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-local") }}
-      - name: {{ .Values.Mount.clienteLib.MountName }}
-        projected:
-          sources:
-          - secret:
-              name: {{ .Values.Mount.superapp.SecretName }}
-          - secret:
-              name: {{ .Values.Mount.clienteLib.SecretName }}
-      {{- end }}
-      {{- if (eq .Values.namespace "crm")}}
-          - secret:
-              name: {{ .Values.Mount.crm.SecretName }}
-      {{- end }}
-      {{- if (eq .Values.appName "app-local-identity-server") }} 
-          - secret:
-              name: {{ .Values.Mount.authenticationIdentityServer.SecretName }}
-      - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
-        secret:
-          defaultMode: 420
-          secretName: {{ .Values.Mount.pfxApplocalIdentityServer.SecretName }}
-      - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
-        secret:
-          defaultMode: 420
-          secretName: {{ .Values.Mount.pemApplocalIdentityServer.SecretName }}
-      {{- end }}
-      {{- if (eq .Values.appName "zabbix-monitoramento-matriz-api") }} 
-      - name: endpoints
-        configMap:
-          defaultMode: 420
-          name: zabbix-monitoring-endpoints
-          optional: false
-      {{- end }}
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -91,9 +58,6 @@ spec:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}  
-          envFrom:
-          - configMapRef:
-              name: namespace-global-envs
           env:
           - name: DD_AGENT_HOST
             valueFrom:
@@ -101,52 +65,3 @@ spec:
                 fieldPath: status.hostIP
           - name: DD_LOGS_INJECTION
             value: 'true'         
-          - name: DD_RUNTIME_METRICS_ENABLED
-            value: 'true'
-          - name: DD_ENTITY_ID
-            valueFrom:
-                fieldRef:
-                    fieldPath: metadata.uid      
-          - name: DD_ENV
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.labels['tags.datadoghq.com/env']
-          - name: DD_SERVICE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.labels['tags.datadoghq.com/service']
-          - name: DD_TRACE_HEADER_TAGS
-            value: "Origem,Chamada"                
-          - name: DD_VERSION
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.labels['tags.datadoghq.com/version']
-          {{- if (eq .Values.appName "app-local-identity-server") }}
-          {{- end }}
-          - name: APP_NAME
-            value: {{ .Values.appName }}  
-          {{- if (eq .Values.useEnvKeyVaulName "true") }}
-          - name: KEY_VAULT_NAME
-            value: {{ .Values.keyVaulName }}  
-          {{- end }}
-          volumeMounts:
-          - name: {{ .Values.Mount.sistemaslocal.MountName }}
-            mountPath: {{ .Values.Mount.sistemaslocal.MountPath }}
-          - name: apmsocketpath
-            mountPath: /var/run/datadog
-          {{- if or (eq .Values.namespace "paladinos") (eq .Values.namespace "crm") (eq .Values.namespace "app-local")}}
-          - name: {{ .Values.Mount.clienteLib.MountName }}
-            mountPath: {{ .Values.Mount.clienteLib.MountPath }}
-          {{- end }}        
-          {{- if (eq .Values.appName "app-local-identity-server") }}  
-          - name: {{ .Values.Mount.pfxApplocalIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pfxApplocalIdentityServer.MountPath }}
-          - name: {{ .Values.Mount.pemApplocalIdentityServer.MountName }}
-            mountPath: {{ .Values.Mount.pemApplocalIdentityServer.MountPath }}
-            subPath: {{ .Values.Mount.pemApplocalIdentityServer.SubPath }} 
-          {{- end }}
-          {{- if (eq .Values.appName "zabbix-monitoramento-matriz-api") }} 
-          - name: endpoints
-            mountPath: /urls/
-          {{- end }}
-
