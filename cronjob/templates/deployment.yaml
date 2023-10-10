@@ -21,6 +21,7 @@ spec:
       template:
         metadata:
           annotations:
+            admission.datadoghq.com/dotnet-lib.version: v2.38.0
             "ad.datadoghq.com/{{ .Values.appName }}.logs" : '[{"source":"csharp"}]'
           labels:
             app: {{ .Values.appName }}
@@ -31,6 +32,7 @@ spec:
             tags.datadoghq.com/env: {{ .Values.environment }}
             tags.datadoghq.com/service: {{ .Values.appName }}
             tags.datadoghq.com/version: {{ .Values.image.tag }}
+            admission.datadoghq.com/enabled: "true"
         spec:  
           restartPolicy: OnFailure
           containers:
